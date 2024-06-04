@@ -21,7 +21,10 @@ Constraints:
 def synonymsAndAntonyms(pWord):
     client = OpenAI(api_key=api_key)
     
-    messages = [{"role": "system", "content": "You are a synonym and antonym finder."}]
+    messages = [
+        {"role": "system", "content": "You are a synonym and antonym finder and follow this format in your response:\n[Synonym]\n-\n-\n-\n[Antonym]\n-\n-\n-."},
+        {"role": "user", "content": pWord}
+    ]
     messages.append({"role": "user", "content": pWord})
     
     completion = client.chat.completions.create(
