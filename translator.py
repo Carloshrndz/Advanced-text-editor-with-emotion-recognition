@@ -1,7 +1,9 @@
-from googletrans import Translator, LANGUAGES
+from k import getDetectLanguageApiKey
+import detectlanguage
+from deep_translator import GoogleTranslator
 
-# Initialization of the translator
-translator = Translator()
+translator = GoogleTranslator()
+detectlanguage.configuration.api_key = getDetectLanguageApiKey()
 
 '''
 Detects the language of the input text.
@@ -17,49 +19,48 @@ Constraints:
 '''
 def detectLanguage(pText):
     try:
-        detection = translator.detect(pText)
-        return detection.lang
+        return detectlanguage.simple_detect(pText)
     except Exception as e:
         print(f"Error detecting language: {e}")
-        return None
-
+        return 'en'
+    
 '''
 Function to translate the text.
 
 Input:
 - pText (str)
+- sourceLanguage (str)
 - targetLanguage (str)
 
 Output:
-- translatedText (str)
+- translation (str)
 The text translated into the specified target language.
 
 Constraints:
 - The input text must be a non-empty string.
 - The targetLanguage must be a valid language code according to the googletrans library.
 '''
-def translateText(pText, targetLanguage):
+def translateText(pText, sourceLanguage, targetLanguage):
     try:
-        translation = translator.translate(pText, dest=targetLanguage)
-        return translation.text
+        translator.source = sourceLanguage
+        translator.target = targetLanguage
+        translation = translator.translate(pText)
+        return translation
     except Exception as e:
-        print(f"Error translating text: {e}")
-        return None
+        return e
 
-text = input("Enter the text you want to translate: ")
-targetLanguage = input(f"Enter the language code of the target language (example: 'es' for Spanish): ")
+'''
+Function to get the Language's dict.
 
-if targetLanguage not in LANGUAGES:
-    print(f"Target language '{targetLanguage}' is not valid.")
-else:
-    initialLanguage = detectLanguage(text)
-    if initialLanguage:
-        print(f"Detected language: {initialLanguage}")
+Input:
+-
+Output:
+- (dict)
+The dictionary of all the supported languages
 
-        translatedText = translateText(text, targetLanguage)
-        if translatedText:
-            print(f"Translated text: {translatedText}")
-        else:
-            print("Failed to translate text.")
-    else:
-        print("Failed to detect the language of the text.")
+Constraints:
+- There are no contrains
+'''
+
+def getLanguageDict():
+    return {'afrikaans': 'af', 'albanian': 'sq', 'amharic': 'am', 'arabic': 'ar', 'armenian': 'hy', 'assamese': 'as', 'aymara': 'ay', 'azerbaijani': 'az', 'bambara': 'bm', 'basque': 'eu', 'belarusian': 'be', 'bengali': 'bn', 'bhojpuri': 'bho', 'bosnian': 'bs', 'bulgarian': 'bg', 'catalan': 'ca', 'cebuano': 'ceb', 'chichewa': 'ny', 'chinese (simplified)': 'zh-CN', 'chinese (traditional)': 'zh-TW', 'corsican': 'co', 'croatian': 'hr', 'czech': 'cs', 'danish': 'da', 'dhivehi': 'dv', 'dogri': 'doi', 'dutch': 'nl', 'english': 'en', 'esperanto': 'eo', 'estonian': 'et', 'ewe': 'ee', 'filipino': 'tl', 'finnish': 'fi', 'french': 'fr', 'frisian': 'fy', 'galician': 'gl', 'georgian': 'ka', 'german': 'de', 'greek': 'el', 'guarani': 'gn', 'gujarati': 'gu', 'haitian creole': 'ht', 'hausa': 'ha', 'hawaiian': 'haw', 'hebrew': 'iw', 'hindi': 'hi', 'hmong': 'hmn', 'hungarian': 'hu', 'icelandic': 'is', 'igbo': 'ig', 'ilocano': 'ilo', 'indonesian': 'id', 'irish': 'ga', 'italian': 'it', 'japanese': 'ja', 'javanese': 'jw', 'kannada': 'kn', 'kazakh': 'kk', 'khmer': 'km', 'kinyarwanda': 'rw', 'konkani': 'gom', 'korean': 'ko', 'krio': 'kri', 'kurdish (kurmanji)': 'ku', 'kurdish (sorani)': 'ckb', 'kyrgyz': 'ky', 'lao': 'lo', 'latin': 'la', 'latvian': 'lv', 'lingala': 'ln', 'lithuanian': 'lt', 'luganda': 'lg', 'luxembourgish': 'lb', 'macedonian': 'mk', 'maithili': 'mai', 'malagasy': 'mg', 'malay': 'ms', 'malayalam': 'ml', 'maltese': 'mt', 'maori': 'mi', 'marathi': 'mr', 'meiteilon (manipuri)': 'mni-Mtei', 'mizo': 'lus', 'mongolian': 'mn', 'myanmar': 'my', 'nepali': 'ne', 'norwegian': 'no', 'odia (oriya)': 'or', 'oromo': 'om', 'pashto': 'ps', 'persian': 'fa', 'polish': 'pl', 'portuguese': 'pt', 'punjabi': 'pa', 'quechua': 'qu', 'romanian': 'ro', 'russian': 'ru', 'samoan': 'sm', 'sanskrit': 'sa', 'scots gaelic': 'gd', 'sepedi': 'nso', 'serbian': 'sr', 'sesotho': 'st', 'shona': 'sn', 'sindhi': 'sd', 'sinhala': 'si', 'slovak': 'sk', 'slovenian': 'sl', 'somali': 'so', 'spanish': 'es', 'sundanese': 'su', 'swahili': 'sw', 'swedish': 'sv', 'tajik': 'tg', 'tamil': 'ta', 'tatar': 'tt', 'telugu': 'te', 'thai': 'th', 'tigrinya': 'ti', 'tsonga': 'ts', 'turkish': 'tr', 'turkmen': 'tk', 'twi': 'ak', 'ukrainian': 'uk', 'urdu': 'ur', 'uyghur': 'ug', 'uzbek': 'uz', 'vietnamese': 'vi', 'welsh': 'cy', 'xhosa': 'xh', 'yiddish': 'yi', 'yoruba': 'yo', 'zulu': 'zu'}
