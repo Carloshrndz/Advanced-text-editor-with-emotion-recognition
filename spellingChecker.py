@@ -1,7 +1,7 @@
 from openai import OpenAI
-from k import getApiKey
+from k import getOpenAIApiKey
 
-api_key = getApiKey()
+api_key = getOpenAIApiKey()
 
 '''
 Corrects spelling and grammar errors in the given text.
