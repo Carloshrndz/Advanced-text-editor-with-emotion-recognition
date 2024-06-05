@@ -2,6 +2,8 @@ import customtkinter as ctk
 import tkinter as tk
 import EditText
 from spellingChecker import *
+from translator import *
+import threading
 import os
 from CTkMessagebox import CTkMessagebox
 from PIL import Image  
@@ -126,7 +128,7 @@ def applyButtons(app):
                                  text="Entity-Relationship Analysis",
                                  command=entityRelationShipSubMenu,
                                  hover_color = '#FF6674')
-    traslatorButton = ctk.CTkButton(master= app,
+    translatorButton = ctk.CTkButton(master= app,
                                  fg_color='#FFADB6',
                                  font = ('', 20),
                                  width=120,
@@ -136,7 +138,7 @@ def applyButtons(app):
                                  border_color= '#FF6674',
                                  corner_radius=7,
                                  text="Traslator",
-                                 command=print('Req6'),
+                                 command=translatorMenu(),
                                  hover_color = '#FF6674')
     wordCloudButton = ctk.CTkButton(master= app,
                                  fg_color='#FFADB6',
@@ -172,7 +174,7 @@ def applyButtons(app):
                                  border_color= '#FF6674',
                                  corner_radius=7,
                                  text="Spelling Checker",
-                                 command=spellingCheckerMenu(),
+                                 command=spellingCheckerMenu,
                                  hover_color = '#FF6674')
     synonymsAndAntonymsButton = ctk.CTkButton(master= app,
                                  fg_color='#FFADB6',
@@ -192,7 +194,7 @@ def applyButtons(app):
     textEditorButton.grid(row=3, column=0)
     collocationAnalysisButton.grid(row=4, column=0)
     entityRelationshipAnalysisButton.grid(row=5, column=0)
-    traslatorButton.grid(row=6, column=0)
+    translatorButton.grid(row=6, column=0)
     wordCloudButton.grid(row=7, column=0)
     textEncoderButton.grid(row=8, column = 0)
     spellingCheckerButton.grid(row=9, column=0)
@@ -531,8 +533,71 @@ def entityRelationShipSubMenu():
         
     subMenu.mainloop()
     
+'''
+translator
+'''
+def translatorMenu():
+    
+    subMenu = ctk.CTk()
+    subMenu.iconbitmap(os.path.join('GUI/icon.ico'))
+    subMenu.title('Translator')
+    
+    subMenu.focus_set()
+    
+    subMenu.geometry(centerWindow(subMenu, 700, 400, subMenu._get_window_scaling()))
+    subMenu.resizable(False, False)
+    
+    subMenu.columnconfigure((0,1,2,3), weight=1)
+    subMenu.rowconfigure(0, weight=1)
+    subMenu.rowconfigure(1, weight=10)
+    
+    sourceLanguageOption = ctk.CTkOptionMenu(subMenu, fg_color='#FFADB6', button_color='#FF6674', button_hover_color='#FF6674', text_color='#303030', values=['Detect Language'])
+    sourceLanguageOption.grid(row=0, column=0, padx=12, pady=2, sticky= ctk.W)
+    
+    targetLanguageOption = ctk.CTkOptionMenu(subMenu, fg_color='#FFADB6', button_color='#FF6674', button_hover_color='#FF6674', text_color='#303030', )
+    targetLanguageOption.grid(row=0, column=2, padx=12, pady=2, sticky= ctk.W)    
+    
+    inputTextBox = ctk.CTkTextbox(subMenu)
+    inputTextBox.grid(row=1, column=0, columnspan=2, sticky=ctk.NSEW, padx=8, pady=12)
+    
+    outputTextBox = ctk.CTkTextbox(subMenu, state='disabled'    )
+    outputTextBox.grid(row=1, column=2, columnspan=2, sticky=ctk.NSEW, padx=8, pady=12)
+    
+    languages = getLanguageDict()
+    for optionMenu in [sourceLanguageOption, targetLanguageOption]:
+            for language in languages:
+                optionMenu.configure(values = optionMenu.cget('values') + [language])
+                
+    targetLanguageOption.set('spanish')
     
     
+   
+    def refreshTrans(e):
+        threadingTranslationFunc = threading.Thread(target=translateFunc, args=(sourceLanguageOption, targetLanguageOption, inputTextBox, outputTextBox))
+        threadingTranslationFunc.start()
+        
+    def translateFunc(sourceLanguageOption, targetLanguageOption, inputTextBox, outputTextBox):
+        
+        text = inputTextBox.get(0.0, 'end')
+
+        if len(text) < 2: return
+    
+        if sourceLanguageOption.get() == 'Detect Language':
+            codeSourceLanguage = detectLanguage(text)
+        else:
+            codeSourceLanguage = languages.get(sourceLanguageOption.get())
+
+        codeTargetLanguage = languages.get(targetLanguageOption.get())
+
+        translation = translateText(text, codeSourceLanguage, codeTargetLanguage)
+        
+        outputTextBox.configure(state='normal')
+        outputTextBox.delete(0.0, 'end')
+        outputTextBox.insert(0.0, translation)
+        outputTextBox.configure(state='disabled')
+
+    subMenu.bind('<Key>', refreshTrans)
+    subMenu.mainloop()
 '''
 spellingCheckerMenu()
 '''
