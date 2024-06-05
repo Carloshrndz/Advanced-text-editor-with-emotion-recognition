@@ -1,7 +1,7 @@
 from openai import OpenAI
 from k import getOpenAIApiKey
 
-api_key = getOpenAIApiKey()
+apiKey = getOpenAIApiKey()
 
 '''
 Corrects spelling and grammar errors in the given text.
@@ -19,7 +19,7 @@ Constraints:
 '''
 
 def correctText(pText):
-    client = OpenAI(api_key=api_key)
+    client = OpenAI(api_key=apiKey)
     messages = [{"role": "system", "content": "You are a spelling and grammar checker for texts, you must indicate and enumerate the errors found and provide correction suggestions."}]
     messages.append({"role": "user", "content": pText})
     completion = client.chat.completions.create(
