@@ -1,7 +1,7 @@
 from openai import OpenAI
-from k import getApiKey
+from k import getOpenAIApiKey
 
-api_key = getApiKey()
+apiKey = getOpenAIApiKey()
 
 '''
 Generates a list of synonyms and antonyms for the word entered by the user.
@@ -19,7 +19,7 @@ Constraints:
 '''
 
 def synonymsAndAntonyms(pWord):
-    client = OpenAI(api_key=api_key)
+    client = OpenAI(api_key=apiKey)
     
     messages = [
         {"role": "system", "content": "You are a synonym and antonym finder and follow this format in your response:\n[Synonym]\n-\n-\n-\n[Antonym]\n-\n-\n-."},
