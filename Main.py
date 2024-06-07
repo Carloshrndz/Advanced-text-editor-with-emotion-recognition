@@ -1,12 +1,15 @@
+import os
 import customtkinter as ctk
 import tkinter as tk
-import EditText
-from spellingChecker import *
-from translator import *
 import threading
-import os
+import wordCloud
 from CTkMessagebox import CTkMessagebox
 from PIL import Image  
+
+import EditText
+import emoticons
+from spellingChecker import *
+from translator import *
 from synonymsAndAntonyms import synonymsAndAntonyms
 from ConvertTextToSpeech import convertTextToSpeech
 from EntityRelationshipAnalysis import namedEntityRecognition, relationshipRecognition
@@ -77,7 +80,7 @@ def applyButtons(app):
                                  border_color= '#FF6674',
                                  corner_radius=7,
                                  text="Interpret Emoticons",
-                                 command=print('Req1'),
+                                 command=interpretEmojisSubMenu,
                                  hover_color = '#FF6674')
     textToSpeechButton = ctk.CTkButton(master= app,
                                  fg_color='#FFADB6',
@@ -138,7 +141,7 @@ def applyButtons(app):
                                  border_color= '#FF6674',
                                  corner_radius=7,
                                  text="Traslator",
-                                 command=translatorMenu(),
+                                 command=translatorMenu,
                                  hover_color = '#FF6674')
     wordCloudButton = ctk.CTkButton(master= app,
                                  fg_color='#FFADB6',
@@ -150,7 +153,7 @@ def applyButtons(app):
                                  border_color= '#FF6674',
                                  corner_radius=7,
                                  text="Word Cloud",
-                                 command=print('Req8'),
+                                 command=wordCloudSubMenu,
                                  hover_color = '#FF6674')
     textEncoderButton = ctk.CTkButton(master= app,
                                  fg_color='#FFADB6',
@@ -208,8 +211,59 @@ def applyButtons(app):
 ███████║╚██████╔╝██████╔╝      ██║ ╚═╝ ██║███████╗██║ ╚████║╚██████╔╝███████║
 ╚══════╝ ╚═════╝ ╚═════╝       ╚═╝     ╚═╝╚══════╝╚═╝  ╚═══╝ ╚═════╝ ╚══════╝
 '''
+'''
+interpretEmojisSubMenu()
+'''
 def interpretEmojisSubMenu():
-    return
+    subMenu = ctk.CTk()
+    subMenu.iconbitmap(os.path.join('GUI/icon.ico'))
+    subMenu.title('Interpret Emojis')
+    
+    subMenu.geometry(centerWindow(subMenu, 600, 300, subMenu._get_window_scaling()))
+    subMenu.resizable(False, False)
+    subMenu.focus_set()
+    
+    subMenu.rowconfigure((0,1,2,3,4,5,6,7,8,9,10), weight=2)
+    subMenu.columnconfigure(0, weight=10)
+    subMenu.columnconfigure((1,2), weight=1)
+                        
+    
+    inputTextBox = ctk.CTkTextbox(subMenu, height=100, width=20)
+    inputTextBox.grid(row=0, column=0, sticky=ctk.NSEW, padx=5, pady=5, rowspan=10)
+    
+    emotionLabelList = []
+    
+    for index, emotion in enumerate(['Joy', 'Sadness','Surprise','Anger','Love','Amazament','Affection','Confusion','Frustration']):
+        ctk.CTkLabel(subMenu, text=f'{emotion}:', width=1, font=('',14)).grid(row=index, column=1, sticky=ctk.E)
+        emotionLabelList.append(ctk.CTkLabel(subMenu, width=120, text='', font=('',14)))
+        emotionLabelList[index].grid(row=index, column=2)
+    
+    interpretButton = ctk.CTkButton(subMenu,  fg_color='#FFADB6',
+                                 font = ('montserrat', 14),
+                                 border_width=2,
+                                 text_color = '#FFFFFF',
+                                 border_color= '#FF6674',
+                                 text="Interpret Emojis",
+                                 command=lambda: interpretEmoticonsButtonFunc(inputTextBox, emotionLabelList),
+                                 hover_color = '#FF6674')
+    interpretButton.grid(row=10, column=0, pady=10)
+    
+    def interpretEmoticonsButtonFunc(inputTextBox, emotionLabelList):
+        text = inputTextBox.get(0.0, 'end')
+        scores = emoticons.interpretEmoticons(text)
+        predominantEmotion = max(scores, key=scores.get)
+
+        iEmotion = 0
+        for emotionInScore, score in scores.items():
+            print(predominantEmotion, emotionInScore)
+            if predominantEmotion == emotionInScore:
+                emotionLabelList[iEmotion].configure(text_color='#B6FFAD')
+            else:
+                emotionLabelList[iEmotion].configure(text_color='#FFADB6')
+            emotionLabelList[iEmotion].configure(text=score)
+            iEmotion += 1
+    subMenu.mainloop()
+
 
 '''
 def textToSpeechSubMenu()
@@ -596,8 +650,54 @@ def translatorMenu():
         outputTextBox.insert(0.0, translation)
         outputTextBox.configure(state='disabled')
 
-    subMenu.bind('<Key>', refreshTrans)
+    inputTextBox.bind('<Key>', refreshTrans)
     subMenu.mainloop()
+    
+    
+    
+    
+'''
+WordCloudSubMenu()
+'''
+
+def wordCloudSubMenu():
+    subMenu = ctk.CTk()
+    subMenu.iconbitmap(os.path.join('GUI/icon.ico'))
+    subMenu.title('Word Cloud Generator')
+    
+    subMenu.focus_set()
+    
+    subMenu.geometry(centerWindow(subMenu, 450, 450, subMenu._get_window_scaling()))
+    subMenu.resizable(False, False)
+    
+    subMenu.columnconfigure(0, weight=1)
+    subMenu.rowconfigure(0, weight=1)
+
+    inputTextBox = ctk.CTkTextbox(subMenu)
+    inputTextBox.grid(row = 0, column=0, sticky=ctk.NSEW, padx=10, pady=10)
+    
+    generateButton = ctk.CTkButton(subMenu,
+                                    fg_color='#FFADB6',
+                                    font = ('', 20),
+                                    width=120,
+                                    height=32,
+                                    border_width=2,
+                                    text_color = '#FFFFFF',
+                                    border_color= '#FF6674',
+                                    corner_radius=7,
+                                    text="Generate",
+                                    command= lambda: generateCloudFunc(inputTextBox),
+                                    hover_color = '#FF6674')
+    generateButton.grid(row=1, column=0, pady=5, padx=5)
+
+    def generateCloudFunc(inputTextBox):
+        text = inputTextBox.get(0.0, 'end')
+        wordCloud.createWordCloud(text)
+        
+    subMenu.mainloop()
+
+
+
 '''
 spellingCheckerMenu()
 '''

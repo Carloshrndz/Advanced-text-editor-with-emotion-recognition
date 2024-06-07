@@ -5,7 +5,7 @@ Input:
 - pEmotion (Str)
 Output:
 - engine.runAndWait(); to execute the speech synthesis.
-Restrictions:
+Constraints:
 - The voice used is specific to Windows. This needs to be adjusted in another platform or if you don't have installed the voice.
 '''
 def convertTextToSpeech(pText, pEmotion = ''):
@@ -31,7 +31,7 @@ Output:
 - rate (int)
 - volume (volume)
 - pitch (int)
-Restrictions:
+Constraints:
 - pEmotion == 'joy' | 'love' | 'anger' | 'sadness' | 'surprise' | 'confusion' | 'affection' | 'frustration' | 'atonishment'
 '''
 def getEmotionConfig(pEmotion):

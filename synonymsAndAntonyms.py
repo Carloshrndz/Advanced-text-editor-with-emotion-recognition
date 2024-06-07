@@ -1,7 +1,7 @@
 from openai import OpenAI
 from k import getOpenAIApiKey
 
-apiKey = getOpenAIApiKey()
+api_key = getOpenAIApiKey()
 
 '''
 Generates a list of synonyms and antonyms for the word entered by the user.
@@ -19,12 +19,9 @@ Constraints:
 '''
 
 def synonymsAndAntonyms(pWord):
-    client = OpenAI(api_key=apiKey)
+    client = OpenAI(api_key=api_key)
     
-    messages = [
-        {"role": "system", "content": "You are a synonym and antonym finder and follow this format in your response:\n[Synonym]\n-\n-\n-\n[Antonym]\n-\n-\n-."},
-        {"role": "user", "content": pWord}
-    ]
+    messages = [{"role": "system", "content": "You are a synonym and antonym finder."}]
     messages.append({"role": "user", "content": pWord})
     
     completion = client.chat.completions.create(
@@ -35,8 +32,3 @@ def synonymsAndAntonyms(pWord):
     response = completion.choices[0].message.content
     
     return response
-
-pWord = input("Enter a word: ")
-response = synonymsAndAntonyms(pWord)
-
-print(response)

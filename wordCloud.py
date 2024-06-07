@@ -7,8 +7,6 @@ Output:
 Restrictions:
 - pText must be a string
 '''
-#pip install wordcloud
-
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 

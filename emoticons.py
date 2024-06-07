@@ -32,14 +32,14 @@ def interpretEmoticons(pText):
     scores = {category: count / totalEmoticons for category, count in emotions.items()}
     return scores
 
-pText = input("Enter the text: ")
+#pText = input("Enter the text: ")
 
-scores = interpretEmoticons(pText)
-print("Emotion analysis results:")
-for emotion, score in scores.items():
-    print(f"{emotion}: {score:.4f}")
-
-predominantEmotion = max(scores, key=scores.get)
-predominantScore = scores[predominantEmotion]
-predominantPercentage = predominantScore * 100
-print("Predominant emotion:", predominantEmotion, "with a score of:", f"{predominantScore:.4f}")
+#scores = interpretEmoticons(pText)
+#print("Emotion analysis results:")
+#for emotion, score in scores.items():
+##    print(f"{emotion}: {score:.4f}")
+#
+#predominantEmotion = max(scores, key=scores.get)
+#predominantScore = scores[predominantEmotion]
+#predominantPercentage = predominantScore * 100
+#print("Predominant emotion:", predominantEmotion, "with a score of:", f"{predominantScore:.4f}")
