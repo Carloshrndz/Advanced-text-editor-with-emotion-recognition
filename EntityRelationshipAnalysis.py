@@ -29,15 +29,16 @@ Constraints:
 '''
 def relationshipRecognition(pText):
     doc = nlp(pText)
-    subjectList = ['nsubjpass', 'nsubj']
-    verbList = ['ROOT', 'auxpass', 'aux']
-    objectList = ['pobj', 'acomp']
+    subjectList = ['nsubjpass', 'nsubj', 'compound']
+    verbList = ['ROOT', 'auxpass', 'aux', 'acl', 'advcl']
+    objectList = ['pobj', 'acomp', 'dobj', 'comppound']
     output = []
-    
     for sentence in doc.sents:
         subject = verb = object = ''
         for iToken in range(len(sentence)):
             token = sentence[iToken]
+            
+            print(token.text+' '+token.dep_)
             
             if token.dep_ in subjectList:
                 if sentence[iToken - 1].dep_ == 'det':
@@ -51,6 +52,7 @@ def relationshipRecognition(pText):
                 object += token.text + ' '
             elif object:
                 break
-            
-        output += [[subject[:-1], verb[:-1], object[:-1]]]
+        if subject and verb and object:
+            output += [[subject[:-1], verb[:-1], object[:-1]]]
     return output
+

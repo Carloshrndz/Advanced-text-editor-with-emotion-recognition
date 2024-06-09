@@ -1,5 +1,3 @@
-
-# pip install pycryptodome
 from Crypto.Cipher import AES
 
 # EncryptAES
@@ -11,7 +9,7 @@ Output:
 - tag(bytes)
 - nonce(bytes)
 Restrictions
--  pText must be a string
+- pText must be a string
 '''
 
 def encryptAES(pString):
@@ -24,14 +22,12 @@ def encryptAES(pString):
     except AttributeError:
         return "Please enter a string"
 
-
-
 # DecryptAES
 '''
 Input:
 - codedText(bytes)
 - tag(bytes)
-- nonce(str)
+- nonce(bytes)
 Output:
 - plainText(str)
 Restrictions:
@@ -48,6 +44,3 @@ def decryptAES(codedText, nonce, tag):
         return plainText.decode("ascii")
     except ValueError:
         return "Key incorrect or message corrupted"
-
-
-    

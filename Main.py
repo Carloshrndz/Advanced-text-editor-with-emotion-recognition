@@ -8,6 +8,7 @@ from PIL import Image
 
 import EditText
 import emoticons
+from CoOccurrence import createCoocurrence
 from spellingChecker import *
 from translator import *
 from synonymsAndAntonyms import synonymsAndAntonyms
@@ -116,7 +117,7 @@ def applyButtons(app):
                                  border_color= '#FF6674',
                                  corner_radius=7,
                                  text="Collocation Analysis",
-                                 command=print('Req4'),
+                                 command=coOcurrenceSubMenu,
                                  hover_color = '#FF6674')
     
     entityRelationshipAnalysisButton = ctk.CTkButton(master= app,
@@ -348,9 +349,8 @@ def textEditorSubMenu():
     countWordsLabel.grid(row=1, column=1, pady=0)
     
     countUniqueWordsLabel = ctk.CTkLabel(subMenu, text='Unique Words: 0', height=2)
-    countUniqueWordsLabel.grid(row=1, column=2, pady=0)
-    
-    subMenu.bind('<Key>', lambda e: refreshCounter(textBox, countCharsLabel, countWordsLabel, countUniqueWordsLabel))
+    countUniqueWordsLabel.grid(row=1, column=2, pady=0)     
+
     def refreshCounter(pTextBox, pCountChars, pCountWords, pCountUniqueWords):
         content = pTextBox.get(0.0, 'end')
         words, uniqueWords = EditText.wordCounter(content)
@@ -358,7 +358,11 @@ def textEditorSubMenu():
         pCountWords.configure(text = f'Words: {words}')
         pCountUniqueWords.configure(text = f'Unique Words: {uniqueWords}')
     
-    # MENUBAR 
+    def threadingRefreshCounterStartFunc():    
+        threadingRefreshCounter = threading.Thread(target=refreshCounter, args=(textBox, countCharsLabel, countWordsLabel, countUniqueWordsLabel))
+        threadingRefreshCounter.start()
+    subMenu.bind('<Key>', lambda e: threadingRefreshCounterStartFunc())
+
     menuBar = tk.Menu(subMenu)
     fileMenu = tk.Menu(menuBar, tearoff=0)
     
@@ -435,10 +439,11 @@ def textEditorSubMenu():
     editMenu = tk.Menu(menuBar, tearoff=0)
     editMenu.add_command(label='Replace                         Ctrl+H', command=lambda: replaceTextDialog(textBox, subMenu))
     def replaceTextDialog(pTextBox, pSubMenu):
-        replaceDialog = ctk.CTkToplevel(pSubMenu)
+        replaceDialog = ctk.CTk()
         replaceDialog.geometry(centerWindow(replaceDialog, 300, 120, replaceDialog._get_window_scaling()))    
-        replaceDialog.grab_set()
-    
+        replaceDialog.focus_set()
+        
+        replaceDialog.iconbitmap(os.path.join('GUI/icon.ico'))
         replaceDialog.title('Replace')
         
         findTextEntry = ctk.CTkEntry(replaceDialog, placeholder_text= 'Find What')
@@ -469,6 +474,7 @@ def textEditorSubMenu():
                 replaceTextEntry.get(), 
                 amountTextEntry.get()), 
             hover_color='#FF6674'
+            
         )
         replaceAllButton = ctk.CTkButton(
             replaceDialog,
@@ -488,7 +494,7 @@ def textEditorSubMenu():
         replaceButton.grid(row=3, column=0, padx=5, pady=5)
         replaceAllButton.grid(row=3, column=1, padx=5, pady=5)
 
-        replaceDialog.mainloop().focus_set()
+        replaceDialog.mainloop()
         
     
     menuBar.add_cascade(label="File", menu=fileMenu)
@@ -496,12 +502,89 @@ def textEditorSubMenu():
     subMenu.config(menu=menuBar)
 
 
-    #Binds
     subMenu.bind('<Control-s>', lambda e: saveAsDialog(textBox))
     subMenu.bind('<Control-n>', lambda e: newFile(textBox))
     subMenu.bind('<Control-o>', lambda e: openFileDialog(textBox))
     subMenu.bind('<Control-h>', lambda e:replaceTextDialog(textBox, subMenu))
 
+    subMenu.mainloop()
+    
+    
+'''
+coOcurrenceSubMenu()
+'''
+def coOcurrenceSubMenu():
+    subMenu = ctk.CTk()
+    subMenu.iconbitmap(os.path.join('GUI/icon.ico'))
+    subMenu.title('Co-Ocurrence')
+    
+    subMenu.focus_set()
+    
+    subMenu.geometry(centerWindow(subMenu, 300, 300, subMenu._get_window_scaling()))
+    subMenu.rowconfigure(0, weight=3)
+    subMenu.rowconfigure(1, weight=2)
+    subMenu.columnconfigure(0, weight=1)
+    
+    inputTextBox = ctk.CTkTextbox(subMenu)
+    inputTextBox.grid(row=0, column=0, padx=5, pady=5, sticky=ctk.NSEW)
+    
+    ctk.CTkButton(subMenu,
+        fg_color='#FFADB6',
+        font = ('', 20),
+        width=120,
+        height=32,
+        border_width=2,
+        text_color = '#FFFFFF',                                 
+        border_color= '#FF6674',
+        corner_radius=7,
+        text="Co-Ocurrence",
+        command= lambda: coOccurrenceButtonFunc(inputTextBox),
+        hover_color = '#FF6674').grid(row=1, column=0)
+    
+    def coOccurrenceButtonFunc(inputTextBox):
+        matrix = createCoocurrence(inputTextBox.get(0.0, 'end'))
+    
+        matrixDisplay = ctk.CTk()
+        matrixDisplay.title('CoOccurrence Display')
+        matrixDisplay.iconbitmap(os.path.join('GUI/icon.ico'))
+    
+        matrixDisplay.focus_set()
+    
+        matrixDisplay.geometry(centerWindow(matrixDisplay, 300, 300, matrixDisplay._get_window_scaling()))
+        matrixDisplay.resizable(True, True)
+    
+        frame = ctk.CTkFrame(matrixDisplay)
+        
+        frame.columnconfigure(0, weight=1)
+        frame.rowconfigure(0, weight=1)
+        frame.pack(expand=True, fill='both')
+    
+        canvas = ctk.CTkCanvas(frame)
+        canvas.grid(row=0, column=0, sticky='nsew')
+       
+        horizontalScrollbar = ctk.CTkScrollbar(frame, orientation='horizontal', command=canvas.xview)
+        verticalScrollbar = ctk.CTkScrollbar(frame, orientation='vertical', command=canvas.yview)
+    
+        horizontalScrollbar.grid(row=1, column=0, sticky='ew')
+        verticalScrollbar.grid(row=0, column=1, sticky='ns')
+    
+        canvas.configure(xscrollcommand=horizontalScrollbar.set, yscrollcommand=verticalScrollbar.set)
+        canvas.rowconfigure(0, weight=1)
+        canvas.columnconfigure(0, weight=1)
+
+        innerFrame = ctk.CTkFrame(canvas)
+    
+        for i, row in enumerate(matrix):
+            for j, col in enumerate(row):
+                ctk.CTkLabel(innerFrame, text=col).grid(row=i, column=j, padx=5, pady=5)
+    
+        innerFrame.update_idletasks()
+        canvas.create_window((0, 0), window=innerFrame, anchor='nw')
+        canvas.configure(scrollregion=canvas.bbox('all'))
+    
+        matrixDisplay.mainloop()
+        
+    
     subMenu.mainloop()
     
 '''
