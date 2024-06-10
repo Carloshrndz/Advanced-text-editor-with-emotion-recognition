@@ -3,6 +3,7 @@ pip install customtkinter
 pip install CTkMessagebox
 pip install openai
 pip install deep-translator
+pip install pycryptodome
 pip install detectlanguage
 pip install wordcloud
 pip install spacy
