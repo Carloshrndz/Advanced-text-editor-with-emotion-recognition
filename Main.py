@@ -11,6 +11,7 @@ import emoticons
 from CoOccurrence import createCoocurrence
 from spellingChecker import *
 from translator import *
+from encrypt import *
 from synonymsAndAntonyms import synonymsAndAntonyms
 from ConvertTextToSpeech import convertTextToSpeech
 from EntityRelationshipAnalysis import namedEntityRecognition, relationshipRecognition
@@ -166,7 +167,7 @@ def applyButtons(app):
                                  border_color= '#FF6674',
                                  corner_radius=7,
                                  text="Text Encoder",
-                                 command=print('Req9'),
+                                 command=textEncoderSubMenu,
                                  hover_color = '#FF6674')    
     spellingCheckerButton = ctk.CTkButton(master= app,
                                  fg_color='#FFADB6',
@@ -505,7 +506,7 @@ def textEditorSubMenu():
     subMenu.bind('<Control-s>', lambda e: saveAsDialog(textBox))
     subMenu.bind('<Control-n>', lambda e: newFile(textBox))
     subMenu.bind('<Control-o>', lambda e: openFileDialog(textBox))
-    subMenu.bind('<Control-h>', lambda e:replaceTextDialog(textBox, subMenu))
+    subMenu.bind('<Control-h>', lambda e: replaceTextDialog(textBox, subMenu))
 
     subMenu.mainloop()
     
@@ -780,7 +781,135 @@ def wordCloudSubMenu():
     subMenu.mainloop()
 
 
+'''
+textEncoderSubMenu()
+'''
+def textEncoderSubMenu():
+    subMenu = ctk.CTk()
+    subMenu.iconbitmap(os.path.join('GUI/icon.ico'))
+    subMenu.title('Text Encoder/Decoder')
+    
+    subMenu.focus_set()
+    
+    subMenu.geometry(centerWindow(subMenu, 800, 600, subMenu._get_window_scaling()))
+    subMenu.resizable(False, False)
+    
+    subMenu.rowconfigure((0, 1, 2, 3, 4, 5, 6, 7, 8), weight= 1)
+    subMenu.columnconfigure((0,1,2,3), weight=1)
+    
+    ctk.CTkLabel(subMenu, text='Encoder', font=('Montserrat', 18)).grid(row=0, column=0, columnspan=2)
+    ctk.CTkLabel(subMenu, text='Decoder', font=('Montserrat', 18)).grid(row=0, column=2, columnspan=2)
+    
+    ctk.CTkLabel(subMenu, text='Code Text:').grid(row=6, column=0)
+    ctk.CTkLabel(subMenu, text='Nonce:').grid(row=7, column=0)
+    ctk.CTkLabel(subMenu, text='Tag:').grid(row=8, column=0)
+    
+    ctk.CTkLabel(subMenu, text='Code Text:').grid(row=1, column=2)
+    ctk.CTkLabel(subMenu, text='Nonce:').grid(row=2, column=2)
+    ctk.CTkLabel(subMenu, text='Tag:').grid(row=3, column=2)
+    
+    inputEncoderTextBox = ctk.CTkTextbox(subMenu)
+    inputEncoderTextBox.grid(row=1, column=0, sticky=ctk.NSEW, padx=16, pady=24, columnspan=2, rowspan = 3)
+    
+    outputEncoderCodeText = ctk.CTkTextbox(subMenu, height=20, state='disabled')
+    outputEncoderCodeText.grid(row=6, column=1, sticky=ctk.EW, padx= 16)
+    
+    outputEncoderNonce = ctk.CTkTextbox(subMenu, height=20, state='disabled')
+    outputEncoderNonce.grid(row=7, column=1, sticky=ctk.EW, padx= 16)
+    
+    outputEncoderTag = ctk.CTkTextbox(subMenu, height=20, state='disabled')
+    outputEncoderTag.grid(row=8, column=1, sticky=ctk.EW, padx= 16)
+    
 
+    inputDecoderCodeText = ctk.CTkTextbox(subMenu, height=20)
+    inputDecoderCodeText.grid(row=1, column=3, sticky=ctk.EW, padx= 16)
+    
+    inputDecoderNonce = ctk.CTkTextbox(subMenu, height=20)
+    inputDecoderNonce.grid(row=2, column=3, sticky=ctk.EW, padx= 16)
+    
+    inputDecoderTag = ctk.CTkTextbox(subMenu, height=20)
+    inputDecoderTag.grid(row=3, column=3, sticky=ctk.EW, padx= 16)
+    
+    outputDecoderTextBox = ctk.CTkTextbox(subMenu, state='disabled')
+    outputDecoderTextBox.grid(row=6, column=2, sticky=ctk.NSEW, padx=16, pady=8, columnspan=2, rowspan = 3)
+    
+    
+    def encodeButtonFunc(inputEncoderTextBox, outputEncoderCodeText, outputEncoderNonce, outputEncoderTag):
+        text = inputEncoderTextBox.get(0.0, 'end')
+        codeText, nonce, tag = encryptAES(text)
+        
+        
+        
+        outputEncoderCodeText.configure(state='normal')
+        outputEncoderCodeText.delete(0.0, 'end')
+        outputEncoderCodeText.insert(0.0, codeText)
+        outputEncoderCodeText.configure(state='disabled')
+        
+        outputEncoderNonce.configure(state='normal')
+        outputEncoderNonce.delete(0.0, 'end')
+        outputEncoderNonce.insert(0.0, nonce)
+        outputEncoderNonce.configure(state='disabled')
+        
+        outputEncoderTag.configure(state='normal')
+        outputEncoderTag.delete(0.0, 'end')
+        outputEncoderTag.insert(0.0, tag)
+        outputEncoderTag.configure(state='disabled')
+        
+        
+    def decoderButtonFunc(inputDecoderCodeText, inputDecoderNonce, inputDecoderTag, outputDecoderTextBox):
+
+        codeText = inputDecoderCodeText.get(0.0, 'end').strip()
+        nonce = inputDecoderNonce.get(0.0, 'end').strip()
+        tag = inputDecoderTag.get(0.0, 'end').strip()
+        
+        decodedText = decryptAES(codeText, nonce, tag)
+        
+        
+        outputDecoderTextBox.configure(state='normal')
+        outputDecoderTextBox.delete(0.0, 'end')
+        outputDecoderTextBox.insert(0.0, decodedText)
+        outputDecoderTextBox.configure(state='disabled')
+
+    encodeButton = ctk.CTkButton(subMenu,
+                                    fg_color='#FFADB6',
+                                    font = ('', 20),
+                                    width=120,
+                                    height=32,
+                                    border_width=2,
+                                    text_color = '#FFFFFF',
+                                    border_color= '#FF6674',
+                                    corner_radius=7,
+                                    text="Encode",
+                                    command= lambda: encodeButtonFunc(inputEncoderTextBox, outputEncoderCodeText, outputEncoderNonce, outputEncoderTag),
+                                    hover_color = '#FF6674')
+    encodeButton.grid(row=4, column=0, pady=5, padx=5, columnspan=2)
+    
+    decodeButton = ctk.CTkButton(subMenu,
+                                    fg_color='#FFADB6',
+                                    font = ('', 20),
+                                    width=120,
+                                    height=32,
+                                    border_width=2,
+                                    text_color = '#FFFFFF',
+                                    border_color= '#FF6674',
+                                    corner_radius=7,
+                                    text="Decode",
+                                    command=lambda: decoderButtonFunc(inputDecoderCodeText, inputDecoderNonce, inputDecoderTag, outputDecoderTextBox),
+                                    hover_color = '#FF6674')
+    decodeButton.grid(row=4, column=2, pady=5, padx=5, columnspan=2)    
+  
+    subMenu.mainloop()
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 '''
 spellingCheckerMenu()
 '''
